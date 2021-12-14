@@ -14,10 +14,25 @@ The number of days for which users have not signed in.
 #>
 
 Function Disable-InactiveADUsers{
+    param(
+        [parameter(Mandatory=$true)]
+        [string]
+        $UsersOU,
 
-    $UsersOU = "OU=Users,OU=Test,DC=TEST,DC=LAB"
-    $DisabledUsersOU = "OU=Disabled,OU=Test,DC=TEST,DC=LAB"
-    $Days = 5
+        [parameter(Mandatory=$false)]
+        [int]
+        $Days = 60,
+
+        [parameter(Mandatory=$false)]
+        [string]
+        $DisabledUsersOU
+    )
+
+    #$UsersOU = "OU=Users,OU=Test,DC=TEST,DC=LAB"
+    #$DisabledUsersOU = "OU=Disabled,OU=Test,DC=TEST,DC=LAB"
+    
+    Write-Host ("UserOU = {0}, Days = {1}, DisabledUsersOU = {2}" -f $UsersOU, $Days, $DisabledUsersOU)
+
 
     # Section search and disable users accounts
     $CutOffDate = (Get-Date).AddDays(-1 * $Days)
@@ -36,4 +51,4 @@ Function Disable-InactiveADUsers{
     }
 }
 
-Disable-InactiveADUsers
+Disable-InactiveADUsers -UsersOU "OU=Users,OU=Test,DC=TEST,DC=LAB" -Days 10 -DisabledUsersOU "OU=Disabled,OU=Test,DC=TEST,DC=LAB"
