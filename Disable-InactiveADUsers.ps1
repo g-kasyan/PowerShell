@@ -96,8 +96,7 @@ Function Disable-InactiveADUsers
 
 
         .EXAMPLE
-        Disable-InactiveADUsers -UsersOU "OU=Users,OU=Test,DC=TEST,DC=LAB" -DisabledUsersOU 
-        "OU=DisabledUsers,OU=Test,DC=TEST,DC=LAB"
+        Disable-InactiveADUsers -UsersOU "OU=Users,OU=Test,DC=TEST,DC=LAB" -DisabledUsersOU "OU=DisabledUsers,OU=Test,DC=TEST,DC=LAB"
         Description
 
         -----------
