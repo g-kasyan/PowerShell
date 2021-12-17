@@ -15,6 +15,8 @@ function Disable-InactiveADUsers
         $DisabledUsersOU
     )
     
+    $ADUsersException = 'krbtgt', 'Guest', 'Administrator', 'Администратор', 'Гость'
+
     $isUserOU = ($UsersOU -ne "")
     $isDisabledUsersOU = ($DisabledUsersOU -ne "")
     
@@ -28,7 +30,8 @@ function Disable-InactiveADUsers
         }
         else
         {
-            $ADUsers = Get-ADUser -Filter * -Properties LastLogon, whenCreated -ErrorAction Stop
+            $ADUsers = Get-ADUser -Filter * -Properties LastLogon, whenCreated -ErrorAction Stop | `
+            Where-Object {$PSItem.Name -notin $ADUsersException}
         }
 
         foreach ($ADUser in $ADUsers)
@@ -112,4 +115,3 @@ function Disable-InactiveADUsers
     #>
 
 }
-
