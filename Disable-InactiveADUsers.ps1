@@ -34,13 +34,13 @@ function Disable-InactiveADUsers
         foreach ($ADUser in $ADUsers)
         {
             $LastLogon = [datetime]::FromFileTime($ADUser.LastLogon)
-    
-	        if ((($ADUser.LastLogon -eq 0) -and ($ADUser.whenCreated -le $CutOffDate)) -or `
+            
+            if ((($ADUser.LastLogon -eq 0) -and ($ADUser.whenCreated -le $CutOffDate)) -or `
                 ($LastLogon -lt $CutOffDate))
 		    {
                 $TimeStamp = Get-Date -Format "dd.MM.yyyy HH:mm"
                 Set-ADUser -Identity $ADUser -Enabled $false -Description ("Account was blocked by sript at {0}" -f $TimeStamp)
-        
+                
                 if ($isDisabledUsersOU)
                 {
                     Move-ADObject -Identity $ADUser -TargetPath $DisabledUsersOU
@@ -112,3 +112,4 @@ function Disable-InactiveADUsers
     #>
 
 }
+
