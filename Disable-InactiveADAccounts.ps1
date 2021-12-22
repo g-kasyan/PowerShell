@@ -62,9 +62,8 @@ function Disable-InactiveADAccounts
     )
     
     $ADUsersException = 'krbtgt', 'Guest', 'Administrator', 'Администратор', 'Гость'
-    
-    [Datetime]$CutOffDate = (Get-Date).AddDays(-$Days)
-    
+    [Datetime]$CutOffDate
+        
     try {
         switch ($PSCmdlet.ParameterSetName)
         {
@@ -78,12 +77,14 @@ function Disable-InactiveADAccounts
                     Where-Object {$PSItem.Name -notin $ADUsersException}
                 }
                 
+                $CutOffDate = (Get-Date).AddDays(-$Days)
+
                 foreach ($ADAccount in $ADAccounts) {
                     
                     $LastLogon = [datetime]::FromFileTime($ADAccount.LastLogon)
                     $isPeriodOver = ($ADAccount.LastLogon -ne 0) -and ($LastLogon -lt $CutOffDate)
                     $isNeverLogon = ($ADAccount.LastLogon -eq 0) -and ($ADAccount.whenCreated -le $CutOffDate)
-                    $isNeedToDisable = $isPeriodOver -or $isNeverLogon
+                    $isNeedToDisable = ($isPeriodOver -or $isNeverLogon)
                     
                     switch($true) {
                         ($isNeedToDisable) {
@@ -116,21 +117,24 @@ function Disable-InactiveADAccounts
                     $ADAccounts = Get-ADComputer -Filter * -Properties pwdLastSet -ErrorAction Stop
                 }
                 
+                $DisablePasswordChangeReg = Get-ItemPropertyValue -Path HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\ -Name DisablePasswordChange
                 $MaximumPasswordAgeReg = Get-ItemPropertyValue -Path HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\ -Name MaximumPasswordAge
                 $MaximumPasswordAge = 2 * $MaximumPasswordAgeReg + 1
-                
-                $IsIncorrect = $Days -lt $MaximumPasswordAge
-                
+
+                $IsDayIncorrect = ($Days -lt $MaximumPasswordAge)
+                $IsIncorrect = ($IsDayIncorrect -and (-not $DisablePasswordChangeReg))
+
                 if ($IsIncorrect) {
                     $Days = $MaximumPasswordAge
-                    $CutOffDate = (Get-Date).AddDays(-$Days)
                 }
-                
+
+                $CutOffDate = (Get-Date).AddDays(-$Days)
+
                 foreach ($ADAccount in $ADAccounts) {
                     
                     $pwdLastSet = [datetime]::FromFileTime($ADAccount.pwdLastSet)
                     
-                    $isNeedToDisable = $pwdLastSet -lt $CutOffDate
+                    $isNeedToDisable = ($pwdLastSet -lt $CutOffDate)
                     
                     switch($true) {
                         ($isNeedToDisable) {
@@ -160,7 +164,7 @@ function Disable-InactiveADAccounts
         Write-Log -Level ERROR -Message ("Organizational unit not found or required permissions are missing.") -Logfile $Logfile
     }
     catch [System.UnauthorizedAccessException] {
-        Write-Log -Level ERROR -Message ("Organizational required permissions are missing.") -Logfile $Logfile
+        Write-Log -Level ERROR -Message ("Required permissions are missing.") -Logfile $Logfile
     }
     catch {
         Write-Log -Level ERROR -Message ("An unknown error occurred.") -Logfile $Logfile
@@ -170,18 +174,31 @@ function Disable-InactiveADAccounts
     
     <#
         .SYNOPSIS
-        Disable user account that have not signed in for a specified numbers of days.
+        Script disables users or computers account that have not signed in for a specified numbers of days.
         
         .DESCRIPTION
-        Use this script to disable AD accounts that have not signed in for an extended period
-        of time. Review the output to ensure that no unintened accounts were disabled.
+        Use this script to disables users or computers AD accounts that have not signed in for an extended 
+        period of time. Review the output to ensure that no unintened accounts were disabled.
         
-        .PARAMETER UsersOU
-        Search for user accounts in the selected OU.
+        .PARAMETER UsersOnly
+        Searchs for only users accounts in Active Directory. The parameter is enabled by default.
+
+        .PARAMETER ComputersOnly
+        Searchs for only computers accounts in Active Directory.
         
         .Parameter Days
-        The number of days for which users have not signed in.
+        The number of days for which account have not signed in.
+        The default number of days is 90.
+
+        For searching computer accounts, the Days parameter cannot be less than twice the maximum 
+        age of the computer password. The maximum age of a password is determined from a registry entry.
+
+
+
         
+        .PARAMETER UsersOU
+        Searchs for users accounts in the selected OU.
+                
         .Parameter DisabledUsersOU
         Moves locked user accounts into a selected OU.
         
