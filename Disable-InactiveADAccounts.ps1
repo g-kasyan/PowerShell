@@ -62,7 +62,7 @@ function Disable-InactiveADAccounts
     )
     
     $ADUsersException = 'krbtgt', 'Guest', 'Administrator', 'Администратор', 'Гость'
-    [Datetime]$CutOffDate
+    $CutOffDate
         
     try {
         switch ($PSCmdlet.ParameterSetName)
@@ -218,11 +218,11 @@ function Disable-InactiveADAccounts
         organizational unit "OU=Users,OU=Test,DC=TEST,DC=LAB" and disables them.
         
         .EXAMPLE
-        Disable-InactiveADAccounts -AccountsOU "OU=Users,OU=Test,DC=TEST,DC=LAB" -Days 10
+        Disable-InactiveADAccounts -AccountsOU "OU=Users,OU=Test,DC=TEST,DC=LAB" -Days 10 -Logfile C:\Logs\DisableAccount.log
         Description
         -----------
         This command searches for inactive users accounts who have not signed in the last 10 days at the 
-        organizational unit "OU=Users,OU=Test,DC=TEST,DC=LAB" and disables them.
+        organizational unit "OU=Users,OU=Test,DC=TEST,DC=LAB" and disables them. All actions are recorded in a log file.
         
         .EXAMPLE
         Disable-InactiveADAccounts -AccountsOU "OU=Users,OU=Test,DC=TEST,DC=LAB" -DisabledAccountsOU "OU=DisabledUsers,OU=Test,DC=TEST,DC=LAB"
