@@ -62,7 +62,6 @@ function Disable-InactiveADAccounts
     )
     
     $ADUsersException = 'krbtgt', 'Guest', 'Administrator', 'Администратор', 'Гость'
-    $CutOffDate
         
     try {
         switch ($PSCmdlet.ParameterSetName)
