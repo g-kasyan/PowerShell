@@ -69,10 +69,10 @@ function Disable-InactiveADAccounts
             'User'
             {
                 if ($AccountsOU) {
-                    $ADAccounts = Get-ADUser -Filter * -SearchBase $AccountsOU -Properties LastLogon, whenCreated -ErrorAction Stop
+                    $ADAccounts = Get-ADUser -Filter 'Enabled -eq $true' -SearchBase $AccountsOU -Properties LastLogon, whenCreated -ErrorAction Stop
                 }
                 else {
-                    $ADAccounts = Get-ADUser -Filter * -Properties LastLogon, whenCreated -ErrorAction Stop | `
+                    $ADAccounts = Get-ADUser -Filter 'Enabled -eq $true' -Properties LastLogon, whenCreated -ErrorAction Stop | `
                     Where-Object {$PSItem.Name -notin $ADUsersException}
                 }
                 
@@ -80,7 +80,7 @@ function Disable-InactiveADAccounts
                 
                 foreach ($ADAccount in $ADAccounts) {
                     
-                    $LastLogon = [datetime]::FromFileTime($ADAccount.LastLogon)
+                    $LastLogon = FromFileTime($ADAccount.LastLogon)
                     $isPeriodOver = ($ADAccount.LastLogon -ne 0) -and ($LastLogon -lt $CutOffDate)
                     $isNeverLogon = ($ADAccount.LastLogon -eq 0) -and ($ADAccount.whenCreated -le $CutOffDate)
                     $isNeedToDisable = ($isPeriodOver -or $isNeverLogon)
@@ -110,10 +110,10 @@ function Disable-InactiveADAccounts
             'Computer'
             {
                 if ($AccountsOU) {
-                    $ADAccounts = Get-ADComputer -Filter * -SearchBase $AccountsOU -Properties pwdLastSet -ErrorAction Stop
+                    $ADAccounts = Get-ADComputer -Filter 'Enabled -eq $true' -SearchBase $AccountsOU -Properties pwdLastSet -ErrorAction Stop
                 }
                 else {
-                    $ADAccounts = Get-ADComputer -Filter * -Properties pwdLastSet -ErrorAction Stop
+                    $ADAccounts = Get-ADComputer -Filter 'Enabled -eq $true' -Properties pwdLastSet -ErrorAction Stop
                 }
                 
                 $DisablePasswordChangeReg = Get-ItemPropertyValue -Path HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\ -Name DisablePasswordChange
@@ -131,7 +131,7 @@ function Disable-InactiveADAccounts
                 
                 foreach ($ADAccount in $ADAccounts) {
                     
-                    $pwdLastSet = [datetime]::FromFileTime($ADAccount.pwdLastSet)
+                    $pwdLastSet = FromFileTime($ADAccount.pwdLastSet)
                     
                     $isNeedToDisable = ($pwdLastSet -lt $CutOffDate)
                     
