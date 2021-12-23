@@ -80,7 +80,7 @@ function Disable-InactiveADAccounts
                 
                 foreach ($ADAccount in $ADAccounts) {
                     
-                    $LastLogon = FromFileTime($ADAccount.LastLogon)
+                    $LastLogon = [datetime]::FromFileTime($ADAccount.LastLogon)
                     $isPeriodOver = ($ADAccount.LastLogon -ne 0) -and ($LastLogon -lt $CutOffDate)
                     $isNeverLogon = ($ADAccount.LastLogon -eq 0) -and ($ADAccount.whenCreated -le $CutOffDate)
                     $isNeedToDisable = ($isPeriodOver -or $isNeverLogon)
@@ -90,16 +90,16 @@ function Disable-InactiveADAccounts
                             Set-ADUser -Identity $ADAccount -Enabled $false
                         }
                         ($isPeriodOver -and $Logfile) {
-                            Write-Log -Message ("User account '{0}' disabled. Reason: user not active for {1} days." -f $ADAccount.SamAccountName, $Days) -Logfile $Logfile
+                            Write-Log -Message ("User account '{0}' disabled. Reason: user not active for {1} days." -f $ADAccount.distinguishedName, $Days) -Logfile $Logfile
                         }
                         ($isNeverLogon -and $Logfile) {
-                            Write-Log -Message ("User account '{0}' disabled. Reason: user has never logged in." -f $ADAccount.SamAccountName) -Logfile $Logfile
+                            Write-Log -Message ("User account '{0}' disabled. Reason: user has never logged in." -f $ADAccount.distinguishedName) -Logfile $Logfile
                         }
                         ($isNeedToDisable -and $DisabledAccountsOU) {
                             Move-ADObject -Identity $ADAccount -TargetPath $DisabledAccountsOU
                         }
                         ($isNeedToDisable -and $DisabledAccountsOU -and $Logfile) {
-                            Write-Log -Message ("User account '{0}' moved to '{1}'." -f $ADAccount.SamAccountName, $DisabledAccountsOU) -Logfile $Logfile
+                            Write-Log -Message ("User account '{0}' moved to '{1}'." -f $ADAccount.distinguishedName, $DisabledAccountsOU) -Logfile $Logfile
                         }
                     }
                 }
@@ -131,7 +131,7 @@ function Disable-InactiveADAccounts
                 
                 foreach ($ADAccount in $ADAccounts) {
                     
-                    $pwdLastSet = FromFileTime($ADAccount.pwdLastSet)
+                    $pwdLastSet = [datetime]::FromFileTime($ADAccount.pwdLastSet)
                     
                     $isNeedToDisable = ($pwdLastSet -lt $CutOffDate)
                     
@@ -140,13 +140,13 @@ function Disable-InactiveADAccounts
                             Set-ADComputer -Identity $ADAccount -Enabled $false
                         }
                         ($isNeedToDisable -and $Logfile) {
-                            Write-Log -Message ("Computer account '{0}' disabled. Reason: The password for the computer account has not been changed for last {1} days." -f $ADAccount.Name, $Days) -Logfile $Logfile
+                            Write-Log -Message ("Computer account '{0}' disabled. Reason: The password for the computer account has not been changed for last {1} days." -f $ADAccount.distinguishedName, $Days) -Logfile $Logfile
                         }
                         ($isNeedToDisable -and $DisabledAccountsOU) {
                             Write-Host ("Move-ADObject -Identity $ADAccount -TargetPath $DisabledAccountsOU")
                         }
                         ($isNeedToDisable -and $DisabledAccountsOU -and $Logfile) {
-                            Write-Log -Message ("Computer account '{0}' moved to '{1}'." -f $ADAccount.Name, $DisabledAccountsOU) -Logfile $Logfile
+                            Write-Log -Message ("Computer account '{0}' moved to '{1}'." -f $ADAccount.distinguishedName, $DisabledAccountsOU) -Logfile $Logfile
                         }
                     }
                 }
@@ -167,7 +167,7 @@ function Disable-InactiveADAccounts
     }
     catch {
         Write-Log -Level ERROR -Message ("An unknown error occurred.") -Logfile $Logfile
-        #$PSItem.Exception | Get-Member
+        $PSItem.Exception | Get-Member
     }
     
     
