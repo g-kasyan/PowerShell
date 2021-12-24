@@ -167,7 +167,7 @@ function Disable-InactiveADAccounts
     }
     catch {
         Write-Log -Level ERROR -Message ("An unknown error occurred.") -Logfile $Logfile
-        $PSItem.Exception | Get-Member
+        #$PSItem.Exception | Get-Member
     }
     
     
@@ -186,7 +186,7 @@ function Disable-InactiveADAccounts
         .PARAMETER ComputersOnly
         Searchs for only computers accounts in Active Directory.
         
-        .Parameter Days
+        .PARAMETER Days
         The number of days for which account have not signed in.
         The default number of days is 90.
         
@@ -196,10 +196,10 @@ function Disable-InactiveADAccounts
         .PARAMETER AccountsOU
         Searchs for users or computers accounts in the selected OU.
         
-        .Parameter DisabledAccountsOU
+        .PARAMETER DisabledAccountsOU
         Moves locked users or computers accounts into a selected OU.
         
-        .Parameter Logfile
+        .PARAMETER Logfile
         The Logfile parameter sends logging messages of what script does during runtime to a file.
         
         .EXAMPLE
