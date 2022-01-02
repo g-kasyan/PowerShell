@@ -118,9 +118,9 @@ function Disable-InactiveADAccounts
                 
                 $DisablePasswordChangeReg = Get-ItemPropertyValue -Path HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\ -Name DisablePasswordChange
                 $MaximumPasswordAgeReg = Get-ItemPropertyValue -Path HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\ -Name MaximumPasswordAge
-                $MaximumPasswordAge = 2 * $MaximumPasswordAgeReg + 1
+                $MaximumPasswordAge = 2 * $MaximumPasswordAgeReg
                 
-                $IsDayIncorrect = ($Days -lt $MaximumPasswordAge)
+                $IsDayIncorrect = ($Days -le $MaximumPasswordAge)
                 $IsIncorrect = ($IsDayIncorrect -and (-not $DisablePasswordChangeReg))
                 
                 if ($IsIncorrect) {
