@@ -3,7 +3,7 @@ function Write-Log {
     param(
     [Parameter(Mandatory=$false)]
     [ValidateSet("INFO","WARNING","ERROR","FATAL","DEBUG")]
-    [String]
+    [string]
     $Level = "INFO",
     
     [Parameter(Mandatory=$true)]
@@ -34,6 +34,64 @@ function Write-Log {
 
 
 function Remove-InactiveADAccounts {
+    <#
+    .SYNOPSIS
+    Script removes disabled users or computers accounts in Active Directory that have not signed in for a  
+    specified numbers of days.
+
+    .DESCRIPTION
+    Use this script to removes disabled users or computers accounts in Active Directory that have not signed in 
+    for an extended period of time. Review the output to ensure that no required accounts were removed.
+
+    .PARAMETER UsersOnly
+    Searchs for only users accounts in Active Directory. The parameter is enabled by default.
+        
+    .PARAMETER ComputersOnly
+    Searchs for only computers accounts in Active Directory.
+
+    .PARAMETER Days
+    The number of days for which account have not signed in. The default number of days is 730.
+    
+    For searching computer accounts, the Days parameter cannot be less than twice the maximum 
+    age of the computer password. The maximum age of a password is determined from a registry entry.
+    
+    .PARAMETER AccountsOU
+    Searchs for users or computers accounts in the selected organizational unit.
+
+    .PARAMETER Logfile
+    The Logfile parameter sends logging messages of what script does during runtime to a file.
+    
+    .EXAMPLE
+    Remove-InactiveADAccounts -AccountsOU "OU=DisabledUsers,OU=Test,DC=test,DC=lab"
+    Description
+    -----------
+    This command searches for disabled inactive users accounts who have not signed in the last 730 days 
+    at the organizational unit "OU=DisabledUsers,OU=Test,DC=test,DC=lab" and removes them.
+
+    .EXAMPLE
+    Remove-InactiveADAccounts -UsersOnly -AccountsOU "OU=DisabledUsers,OU=Test,DC=test,DC=lab"
+    Description
+    -----------
+    This command searches for disabled inactive users accounts who have not signed in the last 730 days 
+    at the organizational unit "OU=DisabledUsers,OU=Test,DC=test,DC=lab" and removes them.
+    
+    .EXAMPLE
+    Remove-InactiveADAccounts -AccountsOU "OU=DisabledUsers,OU=Test,DC=test,DC=lab" -Days 365 -Logfile C:\Logs\RemoveAccount.log
+    Description
+    -----------
+    This command searches for disabled inactive users accounts who have not signed in the last 365 days 
+    at the organizational unit "OU=DisabledUsers,OU=Test,DC=test,DC=lab" and removes them. All actions 
+    are recorded in a log file.
+
+    .EXAMPLE
+    Remove-InactiveADAccounts -ComputersOnly -AccountsOU OU=DisabledComputers,OU=Hardware,DC=test,DC=lab
+    Description
+    -----------
+    This command searches for disabled computers accounts in Active Direcotry who have not changet password 
+    in the last 730 days at the organizational unit OU=DisabledComputers,OU=Hardware,DC=test,DC=lab 
+    and removed them.
+    #>
+
     [CmdletBinding(SupportsShouldProcess=$True, DefaultParameterSetName="User")]
     param(
         [parameter(Mandatory = $false, ParameterSetName = "User")]
