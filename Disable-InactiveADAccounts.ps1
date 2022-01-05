@@ -96,6 +96,8 @@ function Disable-InactiveADAccounts
     
     .EXAMPLE
     Disable-InactiveADAccounts -ComputersOnly -AccountsOU "OU=Computers,OU=Hardware,DC=TEST,DC=LAB" -DisabledAccountsOU "OU=DisabledComputers,OU=Hardware,DC=TEST,DC=LAB"
+    Description
+    -----------
     This command searches for computers accounts who have not changet password in the last 
     90 days at the organizational unit "OU=Computers,OU=Hardware,DC=TEST,DC=LAB", disables and moves them 
     to the organizational unit "OU=DisabledComputers,OU=Hardware,DC=TEST,DC=LAB".
