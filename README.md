@@ -1,4 +1,5 @@
-#PowerShell
+PowerShell
+==========
 
 Various PowerShell functions and scripts.
 
@@ -13,4 +14,3 @@ These files contain functions.  For example, Disable-InactiveADAccounts.ps1 cont
     #Use the functions
     Get-Help Disable-InactiveADAccounts -Full
     Disable-InactiveADAccounts -AccountsOU "OU=Users,OU=Test,DC=TEST,DC=LAB" -Days 10 -Logfile C:\Logs\DisableAccounts.log
-    
