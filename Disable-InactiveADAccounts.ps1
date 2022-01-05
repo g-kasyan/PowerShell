@@ -3,7 +3,7 @@ function Write-Log {
     param(
     [Parameter(Mandatory=$false)]
     [ValidateSet("INFO","WARNING","ERROR","FATAL","DEBUG")]
-    [String]
+    [string]
     $Level = "INFO",
     
     [Parameter(Mandatory=$true)]
@@ -34,6 +34,75 @@ function Write-Log {
 
 function Disable-InactiveADAccounts
 {
+    <#
+    .SYNOPSIS
+    Script disables users or computers Active Directory accounts that have not signed in for a specified 
+    numbers of days.
+    
+    .DESCRIPTION
+    Use this script to disables users or computers Active Directory accounts that have not signed in 
+    for an extended period of time. Review the output to ensure that no unintened accounts were disabled.
+    
+    .PARAMETER UsersOnly
+    Searchs for only users accounts in Active Directory. The parameter is enabled by default.
+        
+    .PARAMETER ComputersOnly
+    Searchs for only computers accounts in Active Directory.
+    
+    .PARAMETER Days
+    The number of days for which account have not signed in.
+    The default number of days is 90.
+    
+    For searching computer accounts, the Days parameter cannot be less than twice the maximum 
+    age of the computer password. The maximum age of a password is determined from a registry entry.
+        
+    .PARAMETER AccountsOU
+    Searchs for users or computers accounts in the selected OU.
+        
+    .PARAMETER DisabledAccountsOU
+    Moves locked users or computers accounts into a selected OU.
+    
+    .PARAMETER Logfile
+    The Logfile parameter sends logging messages of what script does during runtime to a file.
+    
+    .EXAMPLE
+    Disable-InactiveADAccounts
+    Description
+    -----------
+    This command searches for inactive users accounts who have not signed in the last 90 days 
+    and disables them.
+        
+    .EXAMPLE
+    Disable-InactiveADAccounts -UsersOnly -AccountsOU "OU=Users,OU=Test,DC=TEST,DC=LAB"
+    Description
+    -----------
+    This command searches for inactive users accounts who have not signed in the last 90 days at the 
+    organizational unit "OU=Users,OU=Test,DC=TEST,DC=LAB" and disables them.
+        
+    .EXAMPLE
+    Disable-InactiveADAccounts -AccountsOU "OU=Users,OU=Test,DC=TEST,DC=LAB" -Days 10 -Logfile C:\Logs\DisableAccount.log
+    Description
+    -----------
+    This command searches for inactive users accounts who have not signed in the last 10 days at the 
+    organizational unit "OU=Users,OU=Test,DC=TEST,DC=LAB" and disables them. All actions are recorded in a log file.
+    
+    .EXAMPLE
+    Disable-InactiveADAccounts -AccountsOU "OU=Users,OU=Test,DC=TEST,DC=LAB" -DisabledAccountsOU "OU=DisabledUsers,OU=Test,DC=TEST,DC=LAB"
+    Description
+    -----------
+    This command searches for inactive users accounts who have not signed in the last 90 days at the 
+    organizational unit "OU=Users,OU=Test,DC=TEST,DC=LAB", disables and moves them to the organizational 
+    unit "OU=DisabledUsers,OU=Test,DC=TEST,DC=LAB".
+    
+    .EXAMPLE
+    Disable-InactiveADAccounts -ComputersOnly -AccountsOU "OU=Computers,OU=Hardware,DC=TEST,DC=LAB" -DisabledAccountsOU "OU=DisabledComputers,OU=Hardware,DC=TEST,DC=LAB"
+    This command searches for computers accounts who have not changet password in the last 
+    90 days at the organizational unit "OU=Computers,OU=Hardware,DC=TEST,DC=LAB", disables and moves them 
+    to the organizational unit "OU=DisabledComputers,OU=Hardware,DC=TEST,DC=LAB".
+    
+    .FUNCTIONALITY
+    Active Directory
+#>
     [CmdletBinding(SupportsShouldProcess=$True, DefaultParameterSetName="User")]
     param(
         [parameter(Mandatory = $false, ParameterSetName = "User")]
@@ -169,72 +238,4 @@ function Disable-InactiveADAccounts
         Write-Log -Level ERROR -Message ("An unknown error occurred.") -Logfile $Logfile
         #$PSItem.Exception | Get-Member
     }
-    
-    
-    <#
-        .SYNOPSIS
-        Script disables users or computers Active Directory accounts that have not signed in for a specified 
-        numbers of days.
-        
-        .DESCRIPTION
-        Use this script to disables users or computers Active Directory accounts that have not signed in 
-        for an extended period of time. Review the output to ensure that no unintened accounts were disabled.
-        
-        .PARAMETER UsersOnly
-        Searchs for only users accounts in Active Directory. The parameter is enabled by default.
-        
-        .PARAMETER ComputersOnly
-        Searchs for only computers accounts in Active Directory.
-        
-        .PARAMETER Days
-        The number of days for which account have not signed in.
-        The default number of days is 90.
-        
-        For searching computer accounts, the Days parameter cannot be less than twice the maximum 
-        age of the computer password. The maximum age of a password is determined from a registry entry.
-        
-        .PARAMETER AccountsOU
-        Searchs for users or computers accounts in the selected OU.
-        
-        .PARAMETER DisabledAccountsOU
-        Moves locked users or computers accounts into a selected OU.
-        
-        .PARAMETER Logfile
-        The Logfile parameter sends logging messages of what script does during runtime to a file.
-        
-        .EXAMPLE
-        Disable-InactiveADAccounts
-        Description
-        -----------
-        This command searches for inactive users accounts who have not signed in the last 90 days 
-        and disables them.
-        
-        .EXAMPLE
-        Disable-InactiveADAccounts -UsersOnly -AccountsOU "OU=Users,OU=Test,DC=TEST,DC=LAB"
-        Description
-        -----------
-        This command searches for inactive users accounts who have not signed in the last 90 days at the 
-        organizational unit "OU=Users,OU=Test,DC=TEST,DC=LAB" and disables them.
-        
-        .EXAMPLE
-        Disable-InactiveADAccounts -AccountsOU "OU=Users,OU=Test,DC=TEST,DC=LAB" -Days 10 -Logfile C:\Logs\DisableAccount.log
-        Description
-        -----------
-        This command searches for inactive users accounts who have not signed in the last 10 days at the 
-        organizational unit "OU=Users,OU=Test,DC=TEST,DC=LAB" and disables them. All actions are recorded in a log file.
-        
-        .EXAMPLE
-        Disable-InactiveADAccounts -AccountsOU "OU=Users,OU=Test,DC=TEST,DC=LAB" -DisabledAccountsOU "OU=DisabledUsers,OU=Test,DC=TEST,DC=LAB"
-        Description
-        -----------
-        This command searches for inactive users accounts who have not signed in the last 90 days at the 
-        organizational unit "OU=Users,OU=Test,DC=TEST,DC=LAB", disables and moves them to the organizational 
-        unit "OU=DisabledUsers,OU=Test,DC=TEST,DC=LAB".
-        
-        .EXAMPLE
-        Disable-InactiveADAccounts -ComputersOnly -AccountsOU "OU=Computers,OU=Hardware,DC=TEST,DC=LAB" -DisabledAccountsOU "OU=DisabledComputers,OU=Hardware,DC=TEST,DC=LAB"
-        This command searches for computers accounts who have not changet password in the last 
-        90 days at the organizational unit "OU=Computers,OU=Hardware,DC=TEST,DC=LAB", disables and moves them 
-        to the organizational unit "OU=DisabledComputers,OU=Hardware,DC=TEST,DC=LAB".
-    #>
 }
